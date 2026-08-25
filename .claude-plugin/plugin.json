@@ -1,7 +1,7 @@
 {
   "name": "two-body-verify",
-  "description": "Verify claimed project deliverables against artifacts and executable evidence.",
-  "version": "0.1.0",
+  "description": "Verify claimed project deliverables against artifacts and executable evidence. This plugin requires the two-body-verify Python package installed and on PATH.",
+  "version": "0.1.1",
   "author": {
     "name": "Jason Caston"
   },

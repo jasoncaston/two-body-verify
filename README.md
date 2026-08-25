@@ -20,14 +20,18 @@ I made this for anyone reviewing work an agent says is complete. You name the cl
 
 Python 3.11 or newer is required.
 
+Install the package before using either the command line or the plugin. The Python environment's scripts directory must be on `PATH`.
+
 ```console
-python3.11 -m venv .venv
-.venv/bin/pip install -e .
+python3.11 -m pip install "git+https://github.com/jasoncaston/two-body-verify.git@v0.1.1"
+command -v two-body-verify
 ```
 
 ## Install the plugin
 
-After this repository is published at the named location, add its marketplace and install the plugin in Claude Code:
+The package installation above is a prerequisite. The plugin supplies the verification skill, but it does not install the Python package or place `two-body-verify` on `PATH`.
+
+After the package command succeeds and `command -v two-body-verify` returns a path, add the marketplace and install the plugin in Claude Code:
 
 ```text
 /plugin marketplace add jasoncaston/two-body-verify

@@ -9,7 +9,7 @@
       "name": "two-body-verify",
       "source": "./",
       "description": "Verify claimed project deliverables against artifacts and executable evidence.",
-      "version": "0.1.0"
+      "version": "0.1.1"
     }
   ]
 }
