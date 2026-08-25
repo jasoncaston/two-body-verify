@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from two_body_verify.checks import run_check
+from two_body_verify.checks import CHECKERS, run_check
 
 
 FIXTURES = Path(__file__).parent / "fixtures"
@@ -130,6 +130,28 @@ def test_exit_code_only_assertion_is_unsupported():
     assert finding_codes(result) == ["exit-code-only-test"]
 
 
+def test_unittest_assertions_are_recognized():
+    result = run_check(
+        GOOD,
+        {"kind": "test_asserts_values", "path": "test_unittest.py", "expected_tokens": ["status", "verified"]},
+    )
+    assert result.status == "evidenced"
+    assert result.facts["assertion_count"] == 2
+    assert result.facts["expected_values_asserted"] is True
+    assert finding_codes(result) == []
+
+
+def test_wrapped_assertion_is_one_logical_assertion():
+    result = run_check(
+        GOOD,
+        {"kind": "test_asserts_values", "path": "test_wrapped.py", "expected_tokens": ["status", "verified"]},
+    )
+    assert result.status == "evidenced"
+    assert result.facts["assertion_count"] == 1
+    assert result.facts["expected_values_asserted"] is True
+    assert finding_codes(result) == []
+
+
 def test_documented_feature_with_invocation_is_evidenced():
     result = run_check(
         GOOD,
@@ -191,20 +213,41 @@ def test_passing_suite_without_claim_evidence_is_unsupported():
     assert finding_codes(result) == ["suite-pass-not-claim-proof"]
 
 
-def test_external_claim_with_recorded_source_is_evidenced():
+def test_citation_record_is_evidenced_without_support_evaluation():
     result = run_check(
         GOOD,
-        {"kind": "external_source", "path": "SOURCES.md", "source": "https://example.com/reference"},
+        {
+            "kind": "citation_recorded",
+            "path": "SOURCES.md",
+            "source": "https://docs.python.org/3/library/unittest.html",
+        },
     )
     assert result.status == "evidenced"
-    assert result.facts["source_recorded"] is True
+    assert result.facts["citation_recorded"] is True
+    assert finding_codes(result) == []
 
 
-def test_external_claim_without_url_is_unsupported():
-    result = run_check(BAD, {"kind": "external_source", "path": "SOURCES.md", "source": ""})
+def test_claim_without_citation_url_is_unsupported():
+    result = run_check(BAD, {"kind": "citation_recorded", "path": "SOURCES.md", "source": ""})
     assert result.status == "unsupported"
-    assert result.facts["source"] == ""
-    assert finding_codes(result) == ["external-claim-untraced"]
+    assert result.facts["citation"] == ""
+    assert finding_codes(result) == ["citation-not-locatable"]
+
+
+@pytest.mark.parametrize("document", ["README.md", "CHECKLIST.md", "RUBRIC.md"])
+def test_every_implemented_check_is_documented(document):
+    text = (Path(__file__).parents[1] / document).read_text(encoding="utf-8")
+    assert set(CHECKERS) == {
+        "file_content",
+        "pdf_visible_text",
+        "csv_formula_safe",
+        "name_length_cap",
+        "test_asserts_values",
+        "citation_recorded",
+        "documented_feature_invoked",
+        "suite_claim_evidence",
+    }
+    assert [check for check in CHECKERS if f"`{check}`" not in text] == []
 
 
 def test_unknown_check_kind_is_rejected():

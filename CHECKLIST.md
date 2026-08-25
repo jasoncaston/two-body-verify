@@ -9,5 +9,6 @@ Run the checks that match the claim. A check is closed only when its named evide
 | CSV formula injection | Run `csv_formula_safe`. The check strips leading carriage returns and newlines before testing `=`, `+`, `-`, and `@`. | `csv-formula-injection` |
 | Long manifest name | Run `name_length_cap` with the published cap. | `name-length-cap-exceeded` |
 | Exit-only test | Run `test_asserts_values` with the actual values the test must assert. | `exit-code-only-test` |
+| Missing citation record | Run `citation_recorded` with the citation artifact and URL. This confirms location only, not support. | `citation-not-locatable`, `citation-record-missing`, or `citation-not-recorded` |
 | Uninvoked docs claim | Run `documented_feature_invoked` with docs, implementation, and invocation evidence. | `documented-feature-uninvoked` |
 | Suite-only proof | Run `suite_claim_evidence` with a passing suite record and separate evidence containing the claimed values. | `suite-pass-not-claim-proof` |

@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "claims": [
+    {
+      "id": "unittest-assertions",
+      "statement": "The unittest test asserts the status value.",
+      "checks": [
+        {
+          "kind": "test_asserts_values",
+          "path": "test_unittest.py",
+          "expected_tokens": ["status", "verified"]
+        }
+      ]
+    },
+    {
+      "id": "wrapped-assertion",
+      "statement": "The wrapped assert checks the status value.",
+      "checks": [
+        {
+          "kind": "test_asserts_values",
+          "path": "test_wrapped.py",
+          "expected_tokens": ["status", "verified"]
+        }
+      ]
+    }
+  ]
+}

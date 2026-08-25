@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "claims": [
+    {
+      "id": "traceability-boundary",
+      "statement": "The traceability boundary is documented, implemented, and tested.",
+      "checks": [
+        {
+          "kind": "file_content",
+          "path": "README.md"
+        },
+        {
+          "kind": "test_asserts_values",
+          "path": "tests/test_checks.py",
+          "expected_tokens": ["citation_recorded", "citation-not-locatable"]
+        },
+        {
+          "kind": "documented_feature_invoked",
+          "docs_path": "README.md",
+          "docs_token": "`citation_recorded` confirms",
+          "implementation_path": "src/two_body_verify/checks.py",
+          "implementation_token": "def check_citation_recorded",
+          "invocation_path": "tests/test_checks.py",
+          "invocation_token": "\"kind\": \"citation_recorded\""
+        }
+      ]
+    }
+  ]
+}

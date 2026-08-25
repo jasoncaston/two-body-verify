@@ -16,9 +16,9 @@
           "expected_tokens": ["status", "verified"]
         },
         {
-          "kind": "external_source",
+          "kind": "citation_recorded",
           "path": "SOURCES.md",
-          "source": "https://example.com/reference"
+          "source": "https://docs.python.org/3/library/unittest.html"
         },
         {
           "kind": "documented_feature_invoked",

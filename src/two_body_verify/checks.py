@@ -1,10 +1,11 @@
 """Concrete checks used by the verification runner."""
 
+import ast
 import csv
 import json
 import re
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Sequence
+from typing import Any, Dict, Iterable, List
 
 from .models import CheckResult, Finding
 
@@ -15,9 +16,45 @@ PILLARS = {
     "csv_formula_safe": "artifact",
     "name_length_cap": "artifact",
     "test_asserts_values": "tests",
-    "external_source": "sources",
+    "citation_recorded": "traceability",
     "documented_feature_invoked": "docs",
     "suite_claim_evidence": "tests",
+}
+
+UNITTEST_ASSERTIONS = {
+    "assertAlmostEqual",
+    "assertCountEqual",
+    "assertDictEqual",
+    "assertEqual",
+    "assertFalse",
+    "assertGreater",
+    "assertGreaterEqual",
+    "assertIn",
+    "assertIs",
+    "assertIsInstance",
+    "assertIsNone",
+    "assertIsNot",
+    "assertIsNotNone",
+    "assertLess",
+    "assertLessEqual",
+    "assertListEqual",
+    "assertLogs",
+    "assertMultiLineEqual",
+    "assertNoLogs",
+    "assertNotAlmostEqual",
+    "assertNotEqual",
+    "assertNotIn",
+    "assertNotIsInstance",
+    "assertNotRegex",
+    "assertRaises",
+    "assertRaisesRegex",
+    "assertRegex",
+    "assertSequenceEqual",
+    "assertSetEqual",
+    "assertTrue",
+    "assertTupleEqual",
+    "assertWarns",
+    "assertWarnsRegex",
 }
 
 
@@ -205,6 +242,28 @@ def check_name_length_cap(project: Path, spec: Dict[str, Any]) -> CheckResult:
     return _result(kind, "evidenced", facts)
 
 
+def _assertion_expressions(text: str) -> List[str]:
+    """Return complete assert expressions, including wrapped and unittest forms."""
+
+    try:
+        tree = ast.parse(text)
+    except SyntaxError:
+        return []
+    assertions: List[str] = []
+    for node in ast.walk(tree):
+        is_bare_assert = isinstance(node, ast.Assert)
+        is_unittest_assert = (
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Attribute)
+            and node.func.attr in UNITTEST_ASSERTIONS
+        )
+        if is_bare_assert or is_unittest_assert:
+            segment = ast.get_source_segment(text, node)
+            if segment:
+                assertions.append(" ".join(segment.splitlines()))
+    return assertions
+
+
 def check_test_asserts_values(project: Path, spec: Dict[str, Any]) -> CheckResult:
     kind = "test_asserts_values"
     relative = spec.get("path", "")
@@ -219,7 +278,7 @@ def check_test_asserts_values(project: Path, spec: Dict[str, Any]) -> CheckResul
             [Finding("test-evidence-missing", "The claimed test file does not exist.", relative)],
         )
     text = path.read_text(encoding="utf-8")
-    assertions = re.findall(r"(?m)^\s*assert\s+(.+)$", text)
+    assertions = _assertion_expressions(text)
     facts["assertion_count"] = len(assertions)
     if not assertions:
         return _result(
@@ -265,34 +324,34 @@ def check_test_asserts_values(project: Path, spec: Dict[str, Any]) -> CheckResul
     return _result(kind, "evidenced", facts)
 
 
-def check_external_source(project: Path, spec: Dict[str, Any]) -> CheckResult:
-    kind = "external_source"
+def check_citation_recorded(project: Path, spec: Dict[str, Any]) -> CheckResult:
+    kind = "citation_recorded"
     relative = spec.get("path", "")
     source = spec.get("source", "")
     path = _project_file(project, relative)
-    facts = {"path": relative, "source": source, "exists": path.is_file()}
+    facts = {"path": relative, "citation": source, "exists": path.is_file()}
     if not source or not re.match(r"^https?://", source):
         return _result(
             kind,
             "unsupported",
             facts,
-            [Finding("external-claim-untraced", "The external claim has no traceable source URL.", relative)],
+            [Finding("citation-not-locatable", "The claim has no locatable citation URL.", relative)],
         )
     if not path.is_file():
         return _result(
             kind,
             "unsupported",
             facts,
-            [Finding("source-record-missing", "The source record does not exist.", relative)],
+            [Finding("citation-record-missing", "The citation record does not exist.", relative)],
         )
     recorded = source in path.read_text(encoding="utf-8")
-    facts["source_recorded"] = recorded
+    facts["citation_recorded"] = recorded
     if not recorded:
         return _result(
             kind,
             "contradicted",
             facts,
-            [Finding("source-record-contradiction", "The named source is not recorded in the source artifact.", relative)],
+            [Finding("citation-not-recorded", "The citation URL is not recorded in the named artifact.", relative)],
         )
     return _result(kind, "evidenced", facts)
 
@@ -410,7 +469,7 @@ CHECKERS = {
     "csv_formula_safe": check_csv_formula_safe,
     "name_length_cap": check_name_length_cap,
     "test_asserts_values": check_test_asserts_values,
-    "external_source": check_external_source,
+    "citation_recorded": check_citation_recorded,
     "documented_feature_invoked": check_documented_feature_invoked,
     "suite_claim_evidence": check_suite_claim_evidence,
 }

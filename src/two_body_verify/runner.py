@@ -8,7 +8,7 @@ from .claims import load_claims
 from .models import ClaimResult, VerificationReport
 
 
-PILLAR_ORDER = ("artifact", "tests", "sources", "docs")
+PILLAR_ORDER = ("artifact", "tests", "traceability", "docs")
 
 
 def _claim_status(statuses: List[str]) -> str:

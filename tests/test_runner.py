@@ -16,7 +16,7 @@ def write_claims(tmp_path, claims):
 def test_full_report_scores_four_real_pillars():
     report = verify_project(FIXTURES / "good", FIXTURES / "good-claims.json")
     assert report.score == 20
-    assert report.pillar_scores == {"artifact": 5, "tests": 5, "sources": 5, "docs": 5}
+    assert report.pillar_scores == {"artifact": 5, "tests": 5, "traceability": 5, "docs": 5}
     assert report.claims[0].status == "evidenced"
     assert report.to_dict()["counts"] == {"evidenced": 1, "unsupported": 0, "contradicted": 0}
 
@@ -59,6 +59,36 @@ def test_claim_contradicted_by_artifact_is_contradicted(tmp_path):
     assert [finding.code for finding in check.findings] == ["artifact-content-contradiction"]
 
 
+def test_recorded_citation_does_not_claim_source_support(tmp_path):
+    citation = "https://docs.python.org/3/library/unittest.html"
+    claims = write_claims(
+        tmp_path,
+        [
+            {
+                "id": "verified-report",
+                "statement": "The report says verified.",
+                "checks": [
+                    {"kind": "file_content", "path": "artifact.txt", "contains": ["release status: verified"]},
+                    {"kind": "citation_recorded", "path": "artifact.txt", "source": citation},
+                ],
+            }
+        ],
+    )
+    report = verify_project(FIXTURES / "bad", claims)
+    artifact_check, traceability_check = report.claims[0].checks
+    assert report.claims[0].status == "contradicted"
+    assert [finding.code for finding in artifact_check.findings] == ["artifact-content-contradiction"]
+    assert traceability_check.status == "evidenced"
+    assert traceability_check.pillar == "traceability"
+    assert traceability_check.facts["citation"] == citation
+    assert traceability_check.facts["citation_recorded"] is True
+    assert traceability_check.findings == []
+    for document in ("README.md", "RUBRIC.md"):
+        text = (Path(__file__).parents[1] / document).read_text(encoding="utf-8")
+        assert "does not fetch the URL" in text
+        assert "does not evaluate whether the source supports the claim" in text
+
+
 def test_unchecked_pillars_score_zero(tmp_path):
     claims = write_claims(
         tmp_path,
@@ -74,4 +104,4 @@ def test_unchecked_pillars_score_zero(tmp_path):
     )
     report = verify_project(FIXTURES / "good", claims)
     assert report.score == 5
-    assert report.pillar_scores == {"artifact": 5, "tests": 0, "sources": 0, "docs": 0}
+    assert report.pillar_scores == {"artifact": 5, "tests": 0, "traceability": 0, "docs": 0}
