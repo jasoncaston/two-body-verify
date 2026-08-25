@@ -1,0 +1,9 @@
+{
+  "name": "two-body-verify",
+  "description": "Verify claimed project deliverables against artifacts and executable evidence.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Jason Caston"
+  },
+  "license": "MIT"
+}

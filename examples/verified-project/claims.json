@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "claims": [
+    {
+      "id": "verified-delivery",
+      "statement": "The sample report is implemented, tested, sourced, and invoked.",
+      "checks": [
+        {
+          "kind": "file_content",
+          "path": "output/report.txt",
+          "contains": ["status: verified"]
+        },
+        {
+          "kind": "test_asserts_values",
+          "path": "tests/test_report.py",
+          "expected_tokens": ["status: verified"]
+        },
+        {
+          "kind": "external_source",
+          "path": "SOURCES.md",
+          "source": "https://example.com/reference"
+        },
+        {
+          "kind": "documented_feature_invoked",
+          "docs_path": "README.md",
+          "docs_token": "write_report",
+          "implementation_path": "src/report.py",
+          "implementation_token": "def write_report",
+          "invocation_path": "tests/test_report.py",
+          "invocation_token": "write_report("
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "claims": [
+    {
+      "id": "complete-report",
+      "statement": "The report is complete and verified.",
+      "checks": [
+        {
+          "kind": "file_content",
+          "path": "artifact.txt",
+          "contains": ["release status: verified"]
+        },
+        {
+          "kind": "test_asserts_values",
+          "path": "test_values.py",
+          "expected_tokens": ["status", "verified"]
+        },
+        {
+          "kind": "external_source",
+          "path": "SOURCES.md",
+          "source": "https://example.com/reference"
+        },
+        {
+          "kind": "documented_feature_invoked",
+          "docs_path": "README.md",
+          "docs_token": "export_report",
+          "implementation_path": "feature.py",
+          "implementation_token": "def export_report",
+          "invocation_path": "test_feature.py",
+          "invocation_token": "export_report("
+        }
+      ]
+    }
+  ]
+}

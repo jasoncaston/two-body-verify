@@ -1,0 +1,6 @@
+{
+  "name": "short-name",
+  "plugins": [
+    {"name": "also-short"}
+  ]
+}

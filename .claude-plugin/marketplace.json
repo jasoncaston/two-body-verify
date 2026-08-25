@@ -1,0 +1,15 @@
+{
+  "name": "two-body-verify",
+  "description": "Verification tools for checking claimed project deliverables against evidence.",
+  "owner": {
+    "name": "Jason Caston"
+  },
+  "plugins": [
+    {
+      "name": "two-body-verify",
+      "source": "./",
+      "description": "Verify claimed project deliverables against artifacts and executable evidence.",
+      "version": "0.1.0"
+    }
+  ]
+}
